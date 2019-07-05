@@ -33,6 +33,7 @@ def _parse_video_entity_from_js(url):
     if response.status_code != 200:
         return None
 
+    # Inspired by https://stackoverflow.com/a/23896879/1677041
     m = re.search(r"(?s)videoInfo\s*=\s*(\{.*?\});", response.text)
 
     if m is None:
@@ -135,7 +136,7 @@ def download_video(entity):
                     'https://github.com/soimort/you-get', fg='red')
         return False
 
-    filedir, filename = get_download_path(), entity.id + ' - ' + entity.title
+    filedir, filename = get_download_path(), entity.poster_id + '-' + entity.id
     cmd = u'{} {} -O "{}" -o "{}" {}'.format(executable, get_download_options(), filename, filedir, entity.url)
     cur_time = datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d-%H%M%S')
 
@@ -147,11 +148,18 @@ def download_video(entity):
         p = subprocess.Popen(['/bin/sh', '-c', cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         ret_code = None
+        file_type = ''
         click.echo('-' * 20 + ' BEGIN ' + '-' * 20)
 
         while True:
             output = p.stdout.readline().strip()
             ret_code = p.poll()
+
+            # Type:       MPEG-4 video (video/mp4)
+            m = re.search(r'\(video/.*\)', output)
+            if m and m.group(0):
+                type_text = m.group(0)
+                file_type = type_text.split('/')[1][:-1]
 
             if ret_code is not None:
                 break
@@ -160,6 +168,9 @@ def download_video(entity):
 
         end_time = datetime.datetime.now()
         click.echo('-' * 21 + ' END ' + '-' * 21)
+
+        if len(file_type) > 0:
+            filename += '.' + file_type
 
         if ret_code == 0:
             click.echo(click.style('Completed!\nTime elapsed: %s' % str(end_time - start_time), fg='green'))
