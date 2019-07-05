@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='acfun',
-    version='0.1',
+    version='0.2',
     author='Will Han',
     author_email='xingheng.hax@qq.com',
     license='MIT',
