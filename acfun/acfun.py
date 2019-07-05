@@ -4,9 +4,9 @@
 import requests
 import json, re
 from lxml import html
-from entity import Entity
-from config import *
-from database import DB
+from .entity import Entity
+from .config import *
+from .database import DB
 import os, os.path, sys, time, datetime
 import click
 import tempfile

@@ -14,7 +14,7 @@ setup(
     description='acfun video player',
     # long_description=long_description,
     # long_description_content_type='text/markdown',
-    py_modules=['acfun'],
+    packages=['acfun'],
     include_package_data=True,
     install_requires=[
         'requests>=2.21.0',
@@ -23,7 +23,7 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        acfun=acfun:cli
+        acfun=acfun.acfun:cli
     ''',
     classifiers=[
         'Development Status :: 4 - Beta',

@@ -1,7 +1,7 @@
 import os
 import sqlite3
 from collections import namedtuple
-from entity import Entity
+from .entity import Entity
 
 
 def namedtuple_factory(cursor, row):
