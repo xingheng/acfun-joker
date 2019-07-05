@@ -7,7 +7,7 @@ from lxml import html
 from entity import Entity
 from config import *
 from database import DB
-import os, os.path, time, datetime
+import os, os.path, sys, time, datetime
 import click
 import tempfile
 import subprocess
@@ -86,9 +86,9 @@ def fetch_user_page(user_id, page):
     return entities
 
 
-def fetch_user_list(user_id, urlPrinter = None, verbosePrinter = None):
+def fetch_user_list(user_id, start_page = 1, end_page = sys.maxint, urlPrinter = None, verbosePrinter = None):
     total_entities = []
-    page = 1
+    page = start_page
 
     while True:
         entities = fetch_user_page(user_id, page)
@@ -107,6 +107,9 @@ def fetch_user_list(user_id, urlPrinter = None, verbosePrinter = None):
 
         total_entities.extend(entities)
         page += 1
+
+        if page >= end_page:
+            break
 
     return total_entities, page - 1
 
@@ -186,6 +189,24 @@ def download_video(entity):
         return False
 
 
+def _validate_page_range(ctx, param, value):
+    try:
+        if '...' in value:
+            start, end = map(int, value.split('...', 1))
+            end += 1
+        elif '..' in value:
+            start, end = map(int, value.split('..', 1))
+        else:
+            start, end = 0, 0
+
+        if start < end:
+            return start, end
+        else:
+            raise ValueError()
+    except ValueError:
+        raise click.BadParameter('Page range need to be in format 1..10 or 1...10')
+
+
 @click.group()
 @click.option('--debug/--no-debug', default=False)
 @click.pass_context
@@ -200,18 +221,17 @@ def cli(ctx, debug):
 @click.option('--exist-abort/--no-exist-abort', default=False)
 @click.option('--url-only/--verbose', default=False)
 @click.option('--download/--no-download', default=False)
-@click.option('--page', '-p', type=click.INT, default=0)
+@click.option('--page-range', '-p', callback=_validate_page_range, default='1...1000000')
 @click.pass_context
-def user(ctx, user_id, exist_abort, url_only, download, page):
+def user(ctx, user_id, exist_abort, url_only, download, page_range):
     '''
     Parse the user page's videos
     '''
-    if page:
-        total_entities = fetch_user_page(user_id, page)
-    elif url_only:
-        total_entities, page = fetch_user_list(user_id, urlPrinter=click.echo)
+
+    if url_only:
+        total_entities, page = fetch_user_list(user_id, start_page=page_range[0], end_page=page_range[1], urlPrinter=click.echo)
     else:
-        total_entities, page = fetch_user_list(user_id, verbosePrinter=click.echo)
+        total_entities, page = fetch_user_list(user_id, start_page=page_range[0], end_page=page_range[1], verbosePrinter=click.echo)
 
     if not url_only:
         click.echo("Fetched %d entities - %d pages in total." % (len(total_entities), page))
