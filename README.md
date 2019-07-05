@@ -13,7 +13,7 @@ This script tools is used to play with [acfun](https://www.acfun.cn) videos, it 
 pip install acfun -U
 ```
 
-There is a configuration file located `~/.config/acfun-jocker/config` for user preferences, the `entity.sqlite3` database file in the same directory stores all the downloaded videos' meta data including the corresponding video downloaded path, it defaults to the `~/Downloads/acfun-jocker/` and could be changed via the `config` file.
+There is a configuration file located `~/.config/acfun-joker/config` for user preferences, the `entity.sqlite3` database file in the same directory stores all the downloaded videos' meta data including the corresponding video downloaded path, it defaults to the `~/Downloads/acfun-joker/` and could be changed via the `config` file.
 
 #### Usage
 
